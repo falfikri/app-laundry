@@ -1,79 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Laporan Pegawai</title>
-	<style type="text/css">
-		html{
-			margin: 0;
-			padding: 0;
-			font-family: "Nunito", sans-serif;
-		}
-		.header{
-			width: 100%;
-			height: auto;
-			background-color: #f7f7f7f7;
-			padding-bottom: 50px;
-		}
-		.logo-laundry{
-		    object-fit: cover;
-		    width: 4rem;
-		    height: 4rem;
-		}
-		.text-right{
-			text-align: right;
-		}
-		.text-center{
-			text-align: right;
-		}
-		.table-header tr td{
-			padding: 5px;
-			color: #999999;
-			font-size: 12px;
-		}
-		.table-content tr th{
-			padding: 8px;
-			font-size: 11px;
-			color: #999999;
-			border-bottom: 1px solid #ddd;
-		}
-		.table-content tr td{
-			padding: 8px;
-			font-size: 11px;
-			color: #454545;
-			border-bottom: 1px solid #ddd;
-		}
-		.body-content{
-			margin-top: 50px;
-		}
-		.badge {
-		    border-radius: 8px;
-		    color: #fff;
-		    display: inline-block;
-		    line-height: 1;
-		    min-width: 10px;
-		    font-size: 10px;
-		    font-weight: bold;
-		    padding: 3px 7px;
-		    text-align: center;
-		    vertical-align: middle;
-		    white-space: nowrap;
-		}
-		.badge-info{
-			background-color: #4d7cff;
-		}
-		.badge-warning{
-			background-color: #f29d56;
-		}
-		.badge-danger{
-			background-color: #ff5e5e;
-		}
-		.badge-success{
-			background-color: #6fd96f;
-		}
-		.badge-primary{
-			background-color: #7571f9;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="{{ asset('css/style-laporan-pegawai.css')}}">
 </head>
 <body>
 	<div class="header">
