@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon created_at
  * @property Carbon updated_at
  * @property Outlet outlet
+ * @property Pelanggan pelanggan
+ * @property User user
  */
 class Transaksi extends Model
 {
@@ -28,7 +30,7 @@ class Transaksi extends Model
 
     // Table Transaksis
     protected $fillable = [
-        'id_outlet', 'kd_invoice', 'kd_pelanggan', 'tgl_pemberian', 'tgl_selesai', 'tgl_bayar', 'diskon', 'pajak', 'status', 'ket_bayar', 'kd_pegawai'
+        'id_outlet', 'kd_invoice', 'pelanggan_id', 'tgl_pemberian', 'tgl_selesai', 'tgl_bayar', 'diskon', 'pajak', 'status', 'ket_bayar', 'kd_pegawai'
     ];
 
     /**
@@ -37,5 +39,21 @@ class Transaksi extends Model
     public function outlet(): BelongsTo
     {
         return $this->belongsTo('App\Outlet', 'id_outlet', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function pelanggan(): BelongsTo
+    {
+        return $this->belongsTo('App\Pelanggan', 'pelanggan_id', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo 
+    {
+        return $this->belongsTo('App\User', 'user_id', 'id');
     }
 }
