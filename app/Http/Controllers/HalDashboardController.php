@@ -35,7 +35,7 @@ class HalDashboardController extends Controller
     	->orderBy('transaksis.tgl_pemberian', 'DESC')
     	->distinct()
     	->get();
-    	$pelanggan_terbaru = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
+    	$pelanggan_terbaru = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
     	->select('transaksis.*', 'pelanggans.nama_pelanggan')
     	->orderBy('transaksis.created_at', 'DESC')
     	->take(7)
