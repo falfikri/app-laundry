@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int id
- * @property int id_outlet
+ * @property int outlet_id
  * @property string kd_invoice
  * @property string kd_pelanggan
  * @property Carbon tgl_pemberian
@@ -30,7 +30,7 @@ class Transaksi extends Model
 
     // Table Transaksis
     protected $fillable = [
-        'id_outlet', 'kd_invoice', 'pelanggan_id', 'tgl_pemberian', 'tgl_selesai', 'tgl_bayar', 'diskon', 'pajak', 'status', 'ket_bayar', 'kd_pegawai'
+        'outlet_id', 'kd_invoice', 'pelanggan_id', 'tgl_pemberian', 'tgl_selesai', 'tgl_bayar', 'diskon', 'pajak', 'status', 'ket_bayar', 'kd_pegawai'
     ];
 
     /**
@@ -38,7 +38,7 @@ class Transaksi extends Model
      */
     public function outlet(): BelongsTo
     {
-        return $this->belongsTo('App\Outlet', 'id_outlet', 'id');
+        return $this->belongsTo('App\Outlet', 'outlet_id', 'id');
     }
 
     /**

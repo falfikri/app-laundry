@@ -51,7 +51,7 @@
 	<div class="header">
 		<table style="width: 100%;" class="table-header">
 			<tr>
-				<td style="padding-top: 50px; padding-left: 50px;"><img src="{{ asset('icons/pratama_icon.png') }}" class="logo-laundry"></td>
+				<td style="padding-top: 50px; padding-left: 50px;"><img src="{{ public_path('icons/pratama_icon.png') }}" class="logo-laundry"></td>
 				<td class="text-right" style="padding-top: 50px; padding-right: 50px;">Pratama Laundry<br>Jasa Laundry Terbaik di Indonesia</td>
 			</tr>
 			<tr>
