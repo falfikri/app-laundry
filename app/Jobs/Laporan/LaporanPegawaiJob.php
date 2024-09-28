@@ -3,14 +3,16 @@
 namespace App\Jobs\Laporan;
 
 use Illuminate\Bus\Queueable;
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use App\Services\LaporanPegawaiService;
-
+use Illuminate\Support\Facades\Storage;
 
 class LaporanPegawaiJob implements ShouldQueue
 {
@@ -19,26 +21,19 @@ class LaporanPegawaiJob implements ShouldQueue
     protected $id;
     protected $requestedData;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     public function __construct(int $id, array $requestedData)
     {
         $this->id = $id;
         $this->requestedData = $requestedData;
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle(LaporanPegawaiService $laporanPegawaiService)
+    public function handle(LaporanPegawaiService $laporanPegawaiService): void
     {
+        // Konversi requestedData menjadi instance Request
+        $request = new Request($this->requestedData);
+
         // Mengambil data laporan dari service
-        $laporanData = $laporanPegawaiService->getLaporanPegawai($this->id, (object) $this->requestedData);
+        $laporanData = $laporanPegawaiService->getLaporanPegawai($this->id, $request);
 
         if ($laporanData['success']) {
             // Generate PDF dengan data yang didapat dari service
@@ -47,11 +42,16 @@ class LaporanPegawaiJob implements ShouldQueue
                 'tanggal'     => $laporanData['tanggal'],
                 'start_date2' => $laporanData['start_date2'],
                 'end_date2'   => $laporanData['end_date2']
-            ]);
+            ])->output();
 
-            // Simpan file PDF di storage
-            $filePath = storage_path('app/public/pdf/laporan_' . $this->id . '.pdf');
-            $pdf->save($filePath);
+            // Mendapatkan bulan saat ini atau dari laporan
+            $bulan = Carbon::now()->format('F_Y'); // Format bulan dan tahun, contoh: September_2024
+
+            // Tentukan path relatif di folder 'pdf' di storage/public
+            $filePath = 'pdf/laporan_' . $this->id . '_' . $bulan . '.pdf';
+
+            // Simpan file PDF di disk 'public' (storage/app/public/pdf/)
+            Storage::disk('public')->put($filePath, $pdf);
         }
     }
 }

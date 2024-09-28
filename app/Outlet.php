@@ -30,6 +30,6 @@ class Outlet extends Model
      */
     public function transaksi(): HasMany
     {
-        return $this->hasMany('App\Transaksi', 'id_outlet', 'id');
+        return $this->hasMany('App\Transaksi', 'outlet_id', 'id');
     }
 }

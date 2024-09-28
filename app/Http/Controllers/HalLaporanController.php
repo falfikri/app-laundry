@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Carbon;
+use Carbon\Carbon;
 use App\User;
 use App\Transaksi;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use App\Services\LaporanPegawaiService;
 use App\Jobs\Laporan\LaporanPegawaiJob;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class HalLaporanController extends Controller
 {
@@ -22,7 +25,7 @@ class HalLaporanController extends Controller
     	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
     	->where('transaksis.status', 'diambil')
     	->get();
-    	$hari_ini = Carbon\Carbon::now();
+    	$hari_ini = Carbon::now();
         $hari_ini2 = $hari_ini->isoFormat('MM/DD/YYYY');
         $bulan_depan = $hari_ini->add(1, 'month');
         $bulan_depan2 = $bulan_depan->isoFormat('MM/DD/YYYY');
@@ -119,20 +122,47 @@ class HalLaporanController extends Controller
     	}
     }
 
-    // Cetak PDF Laporan Pegawai
-    public function pdfLaporanPegawai(LaporanPegawaiService $service, Request $req, $id)
-    {
-		$response = $service->getLaporanPegawai($id, $req);
+	// Cetak PDF Laporan Pegawai
+	public function pdfLaporanPegawai(LaporanPegawaiService $service, Request $request, $id): JsonResponse|RedirectResponse
+	{
+		// Kirim instance Request langsung ke service
+		$response = $service->getLaporanPegawai($id, $request);
 
 		if ($response['success']) {
 			// Dispatch Job untuk membuat PDF
-			LaporanPegawaiJob::dispatch($id, $req->all());
+			LaporanPegawaiJob::dispatch($id, $request->all());
 
-			return response()->json(['message' => 'Laporan sedang diproses. PDF akan tersedia dalam beberapa saat.']);
+			// return redirect()->back()->with('success', 'Laporan sedang diproses. Silahkan cek kembali dalam beberapa saat.');
+			return redirect()
+				->route('laporan-pegawai.download', $id)
+				->with('success', 'Laporan sedang diproses. Silahkan cek kembali dalam beberapa saat.');
 		} else {
 			return response()->json(['message' => 'Gagal memproses laporan.'], 500);
 		}
-    }
+	}
+
+
+	// Download PDF Laporan Pegawai
+	public function downloadLaporanPegawai($id, LaporanPegawaiService $laporanPegawaiService, Request $request)
+	{
+		// Mendapatkan bulan untuk menyesuaikan dengan nama file
+		$bulan = Carbon::now()->format('F_Y');
+
+		// Tentukan path file di dalam storage/public/pdf
+		$filePath = 'pdf/laporan_' . $id . '_' . $bulan . '.pdf';
+
+		// Cek apakah file ada di storage
+		if (Storage::disk('public')->exists($filePath)) {
+			// Jika file ada, return response download
+			return response()->download(storage_path('app/public/' . $filePath));
+		}
+
+		// Jika file tidak ditemukan
+		return response()->json(['message' => 'File not found'], 404);
+	}
+
+
+
 
     // Cetak PDF Laporan Transaksi
     public function pdfLaporanTransaksi(Request $req)

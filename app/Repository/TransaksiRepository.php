@@ -11,8 +11,8 @@ class TransaksiRepository
     {
         return Transaksi::query()
             ->with([
-                'outlet:nama',
-                'pelanggan:nama_pelanggan'
+                'outlet',
+                'pelanggan'
             ])
             ->where('user_id', $userId)
             ->orderBy('tgl_pemberian', 'desc')

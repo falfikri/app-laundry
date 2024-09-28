@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Repository\TransaksiRepository;
 
 class LaporanPegawaiService
@@ -14,19 +16,17 @@ class LaporanPegawaiService
         $this->transaksiRepository = $transaksiRepository;
     }
 
-    public function getLaporanPegawai(int $id, $req): array
+    public function getLaporanPegawai(int $id, Request $request): array
     {
-        dd($req);
         // Validasi start_date dan end_date
-        $start_date = $req->start_date ? Carbon::parse($req->start_date)->format('Y-m-d') : null;
-        $end_date = $req->end_date ? Carbon::parse($req->end_date)->format('Y-m-d') : null;
+        $start_date = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->format('Y-m-d') : null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->format('Y-m-d') : null;
 
         // Jika 'check_semua' bernilai 1, ambil semua riwayat
-        if (isset($req->check_semua) && $req->check_semua == 1) {
+        if ($request->input('check_semua') == 1) {
             $transaksi = $this->transaksiRepository->getRiwayatSemuaInvoice($id);
             $tanggal = "Semua Invoice";
         } else {
-            // Jika start_date dan end_date tidak null, ambil riwayat berdasarkan tanggal
             if ($start_date && $end_date) {
                 $transaksi = $this->transaksiRepository->getRiwayatByDateRange($id, $start_date, $end_date);
             } else {
@@ -43,5 +43,4 @@ class LaporanPegawaiService
             "end_date2" => $end_date
         ];
     }
-
 }
