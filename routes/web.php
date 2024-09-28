@@ -76,6 +76,7 @@ Route::group(['middleware' => ['auth', 'checkRole:admin,kasir']], function(){
 	Route::post('/filter_laporan_pegawai/{id}', 'HalLaporanController@filterLaporanPegawai');
 	Route::post('/pdf_laporan_transaksi', 'HalLaporanController@pdfLaporanTransaksi');
 	Route::post('/pdf_laporan_pegawai/{id}', 'HalLaporanController@pdfLaporanPegawai');
+	Route::get('/laporan-pegawai/download/{id}', 'HalLaporanController@downloadLaporanPegawai')->name('laporan-pegawai.download');
 });
 // =================================================================================================
 

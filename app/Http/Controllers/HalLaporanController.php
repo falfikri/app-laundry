@@ -2,26 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Carbon;
+use Carbon\Carbon;
 use App\User;
 use App\Transaksi;
 use Illuminate\Http\Request;
-use App\Services\LaporanPegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use App\Services\LaporanPegawaiService;
+use App\Jobs\Laporan\LaporanPegawaiJob;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class HalLaporanController extends Controller
 {
     // Membuka Halaman Laporan Transaksi
     public function halamanLaporanTransaksi()
     {
-    	$transaksis = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+    	$transaksis = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+    	->join('users', 'users.id', '=', 'transaksis.user_id')
     	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
     	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
     	->where('transaksis.status', 'diambil')
     	->get();
-    	$hari_ini = Carbon\Carbon::now();
+    	$hari_ini = Carbon::now();
         $hari_ini2 = $hari_ini->isoFormat('MM/DD/YYYY');
         $bulan_depan = $hari_ini->add(1, 'month');
         $bulan_depan2 = $bulan_depan->isoFormat('MM/DD/YYYY');
@@ -48,11 +52,11 @@ class HalLaporanController extends Controller
     public function halamanLaporanPegawaiRiwayat($id)
     {
     	$users = User::find($id);
-    	$riwayats = Transaksi::join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
-    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-    	->join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
+    	$riwayats = Transaksi::join('users', 'users.id', '=', 'transaksis.user_id')
+    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+    	->join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
     	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan')
-    	->where('transaksis.kd_pegawai', $users->kd_pengguna)
+    	->where('transaksis.user_id', $users->id)
     	->orderBy('transaksis.tgl_pemberian', 'DESC')
     	->get();
     	return view('halaman_laporan.halaman_laporan_riwayat', compact('users', 'id', 'riwayats'));
@@ -63,11 +67,11 @@ class HalLaporanController extends Controller
     {
     	if($req->check_semua == 1){
     		$users = User::find($id);
-    		$riwayats = Transaksi::join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
+    		$riwayats = Transaksi::join('users', 'users.id', '=', 'transaksis.user_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan')
-	    	->where('transaksis.kd_pegawai', $users->kd_pengguna)
+	    	->where('transaksis.user_id', $users->id)
 	    	->orderBy('transaksis.tgl_pemberian', 'DESC')
 	    	->get();
 	    	return view('halaman_laporan.sort_halaman_laporan_pegawai', compact('riwayats'));
@@ -77,11 +81,11 @@ class HalLaporanController extends Controller
     		$end_date = $req->end_date;
     		$start_date2 = $start_date[6].$start_date[7].$start_date[8].$start_date[9].'-'.$start_date[0].$start_date[1].'-'.$start_date[3].$start_date[4];
     		$end_date2 = $end_date[6].$end_date[7].$end_date[8].$end_date[9].'-'.$end_date[0].$end_date[1].'-'.$end_date[3].$end_date[4];
-    		$riwayats = Transaksi::join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
+    		$riwayats = Transaksi::join('users', 'users.id', '=', 'transaksis.user_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan')
-	    	->where('transaksis.kd_pegawai', $users->kd_pengguna)
+	    	->where('transaksis.user_id', $users->id)
 	    	->whereBetween('transaksis.tgl_pemberian', array($start_date2, $end_date2))
 	    	->orderBy('transaksis.tgl_pemberian', 'DESC')
 	    	->get();
@@ -93,9 +97,9 @@ class HalLaporanController extends Controller
     public function filterLaporanTransaksi(Request $req)
     {
 		if($req->check_semua == 1){
-    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('users', 'users.id', '=', 'transaksis.user_id')
 	    	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
 	    	->where('transaksis.status', 'diambil')
@@ -106,9 +110,9 @@ class HalLaporanController extends Controller
     		$end_date = $req->end_date;
     		$start_date2 = $start_date[6].$start_date[7].$start_date[8].$start_date[9].'-'.$start_date[0].$start_date[1].'-'.$start_date[3].$start_date[4];
     		$end_date2 = $end_date[6].$end_date[7].$end_date[8].$end_date[9].'-'.$end_date[0].$end_date[1].'-'.$end_date[3].$end_date[4];
-    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('users', 'users.id', '=', 'transaksis.user_id')
 	    	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
 	    	->where('transaksis.status', 'diambil')
@@ -118,75 +122,62 @@ class HalLaporanController extends Controller
     	}
     }
 
-    // Cetak PDF Laporan Pegawai
-    public function pdfLaporanPegawai(LaporanPegawaiService $service, Request $req, $id)
-    {
-		$response = $service->getLaporanPegawai();
-		dd($response);
-    	// if($req->check_semua == 1){
-    	// 	$users = User::where('id', $id)
-		// 	->select('kd_pengguna', 'name', 'role')
-		// 	->first();
-    	// 	$riwayats = Transaksi::join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
-	    // 	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    // 	->join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    // 	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan')
-	    // 	->where('transaksis.kd_pegawai', $users->kd_pengguna)
-	    // 	->orderBy('transaksis.tgl_pemberian', 'DESC')
-	    // 	->get();
-	    // 	$tanggal = "Semua Invoice";
-	    // 	$start_date2 = "";
-	    // 	$end_date2 = "";
+	// Cetak PDF Laporan Pegawai
+	public function pdfLaporanPegawai(LaporanPegawaiService $service, Request $request, $id): JsonResponse|RedirectResponse
+	{
+		// Kirim instance Request langsung ke service
+		$response = $service->getLaporanPegawai($id, $request);
 
-	    // 	$pdf = PDF::loadview('halaman_laporan.pdf_laporan_pegawai', [
-	    // 		'users' => $users,
-	    //         'riwayats' => $riwayats,
-	    //         'tanggal' => $tanggal,
-	    //         'start_date2' => $start_date2,
-	    //         'end_date2' => $end_date2
-	    //     ]);
-	    //     return $pdf->stream();
-    	// }else{
-    	// 	$users = User::find($id);
-    	// 	$start_date = $req->start_date;
-    	// 	$end_date = $req->end_date;
-    	// 	$start_date2 = $start_date[6].$start_date[7].$start_date[8].$start_date[9].'-'.$start_date[0].$start_date[1].'-'.$start_date[3].$start_date[4];
-    	// 	$end_date2 = $end_date[6].$end_date[7].$end_date[8].$end_date[9].'-'.$end_date[0].$end_date[1].'-'.$end_date[3].$end_date[4];
-    	// 	$riwayats = Transaksi::join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
-	    // 	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    // 	->join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    // 	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan')
-	    // 	->where('transaksis.kd_pegawai', $users->kd_pengguna)
-	    // 	->whereBetween('transaksis.tgl_pemberian', array($start_date2, $end_date2))
-	    // 	->orderBy('transaksis.tgl_pemberian', 'DESC')
-	    // 	->get();
-	    // 	$tanggal = "";
+		if ($response['success']) {
+			// Dispatch Job untuk membuat PDF
+			LaporanPegawaiJob::dispatch($id, $request->all());
 
-	    // 	$pdf = PDF::loadview('halaman_laporan.pdf_laporan_pegawai', [
-	    //         'users' => $users,
-	    //         'riwayats' => $riwayats,
-	    //         'tanggal' => $tanggal,
-	    //         'start_date2' => $start_date2,
-	    //         'end_date2' => $end_date2
-	    //     ]);
-	    //     return $pdf->stream();
-    	// }
-    }
+			// return redirect()->back()->with('success', 'Laporan sedang diproses. Silahkan cek kembali dalam beberapa saat.');
+			return redirect()
+				->route('laporan-pegawai.download', $id)
+				->with('success', 'Laporan sedang diproses. Silahkan cek kembali dalam beberapa saat.');
+		} else {
+			return response()->json(['message' => 'Gagal memproses laporan.'], 500);
+		}
+	}
+
+
+	// Download PDF Laporan Pegawai
+	public function downloadLaporanPegawai($id, LaporanPegawaiService $laporanPegawaiService, Request $request)
+	{
+		// Mendapatkan bulan untuk menyesuaikan dengan nama file
+		$bulan = Carbon::now()->format('F_Y');
+
+		// Tentukan path file di dalam storage/public/pdf
+		$filePath = 'pdf/laporan_' . $id . '_' . $bulan . '.pdf';
+
+		// Cek apakah file ada di storage
+		if (Storage::disk('public')->exists($filePath)) {
+			// Jika file ada, return response download
+			return response()->download(storage_path('app/public/' . $filePath));
+		}
+
+		// Jika file tidak ditemukan
+		return response()->json(['message' => 'File not found'], 404);
+	}
+
+
+
 
     // Cetak PDF Laporan Transaksi
     public function pdfLaporanTransaksi(Request $req)
     {
     	if($req->check_semua == 1){
-    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('users', 'users.id', '=', 'transaksis.user_id')
 	    	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
 	    	->where('transaksis.status', 'diambil')
 	    	->get();
-	    	$pemasukan = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+	    	$pemasukan = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('users', 'users.id', '=', 'transaksis.user_id')
 	    	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
 	    	->where('transaksis.status', 'diambil')
@@ -208,17 +199,17 @@ class HalLaporanController extends Controller
     		$end_date = $req->end_date;
     		$start_date2 = $start_date[6].$start_date[7].$start_date[8].$start_date[9].'-'.$start_date[0].$start_date[1].'-'.$start_date[3].$start_date[4];
     		$end_date2 = $end_date[6].$end_date[7].$end_date[8].$end_date[9].'-'.$end_date[0].$end_date[1].'-'.$end_date[3].$end_date[4];
-    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+    		$transaksis = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('users', 'users.id', '=', 'transaksis.user_id')
 	    	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
 	    	->where('transaksis.status', 'diambil')
 	    	->whereBetween('transaksis.tgl_bayar', array($start_date2, $end_date2))
 	    	->get();
-	    	$pemasukan = Transaksi::join('pelanggans', 'pelanggans.kd_pelanggan', '=', 'transaksis.kd_pelanggan')
-	    	->join('outlets', 'outlets.id', '=', 'transaksis.id_outlet')
-	    	->join('users', 'users.kd_pengguna', '=', 'transaksis.kd_pegawai')
+	    	$pemasukan = Transaksi::join('pelanggans', 'pelanggans.id', '=', 'transaksis.pelanggan_id')
+	    	->join('outlets', 'outlets.id', '=', 'transaksis.outlet_id')
+	    	->join('users', 'users.id', '=', 'transaksis.user_id')
 	    	->join('struks', 'struks.kd_invoice', '=', 'transaksis.kd_invoice')
 	    	->select('transaksis.*', 'outlets.nama as nama_outlet', 'pelanggans.nama_pelanggan', 'users.name as nama_pegawai', 'struks.*')
 	    	->where('transaksis.status', 'diambil')

@@ -15,9 +15,15 @@ class CreateTransaksiTable extends Migration
     {
         Schema::create('transaksis', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_outlet');
+            $table->foreignId('outlet_id')
+                ->constrained('outlets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->string('kd_invoice');
-            $table->string('kd_pelanggan');
+            $table->foreignId('pelanggan_id')
+                ->constrained('pelanggans')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->date('tgl_pemberian');
             $table->date('tgl_selesai')->nullable();
             $table->date('tgl_bayar')->nullable();
@@ -25,7 +31,10 @@ class CreateTransaksiTable extends Migration
             $table->bigInteger('pajak')->nullable();
             $table->string('status');
             $table->string('ket_bayar');
-            $table->string('kd_pegawai');
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
