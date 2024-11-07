@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Bunda Laundry</title>
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('icons/logo.png') }}">
+    <title>Princess Laundry</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('icons/logoprincess1.png') }}">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     @yield('css')
 </head>
@@ -21,10 +21,8 @@
         <div class="nav-header">
             <div class="brand-logo">
                 <a href="{{ url('/dashboard') }}">
-                    <!-- <b class="logo-abbr"><img src="{{ asset('icons/pratama_icon_w.png') }}" alt=""> </b> -->
-                    <!-- <span class="logo-compact"><img src="{{ asset('icons/pratama_text.png') }}" width="110" alt=""></span> -->
                     <span class="brand-title">
-                        <img src="{{ asset('icons/logoo.png') }}" width="148px"  alt="">
+                        <img src="{{ asset('icons/logoprincess2.png') }}" width="150px"  alt="">
                     </span>
                 </a>
             </div>

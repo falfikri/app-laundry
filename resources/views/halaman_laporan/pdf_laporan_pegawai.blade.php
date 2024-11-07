@@ -84,7 +84,7 @@
             <tr>
                 <td><img src="{{ public_path('icons/pratama_icon.png') }}" class="logo-laundry"></td>
                 <td class="text-right">
-                    Pratama Laundry<br>Jasa Laundry Terbaik di Indonesia
+                    Princess Laundry<br>
                 </td>
             </tr>
             <tr>

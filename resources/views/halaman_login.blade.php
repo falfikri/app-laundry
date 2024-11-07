@@ -5,17 +5,17 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Bunda Laundry</title>
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('icons/logo.png') }}">
+    <title>Princess Laundry</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('icons/logoprincess1.png') }}">
     <link href="{{ asset('plugins/sweetalert/css/sweetalert.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 
-    <style>
+    <!-- <style>
         .login-form-bg {
             background-image: url('{{ asset('images/wash_mach.jpg') }}');
             background-size: 100% 100%;
         }
-    </style>
+    </style> -->
 </head>
 <body class="h-100">
     <div id="preloader">
